@@ -1,0 +1,84 @@
+# Builds End of Eden's terminal version for the Asciiverse catalog: one
+# archive per target, named end-of-eden-<target>.tar.gz (Linux, macOS) or
+# .zip (Windows), plus a SHA256SUMS file, attached to a GitHub release
+# (hub/catalog/SCHEMA.md, release.source = "github").
+#
+# Tags look like v0.2.2-av.1: upstream's version, then our packaging
+# release. Only the terminal version (./cmd/game) is built: no _gl
+# window, no SSH server, no WASM. With cgo off one Linux runner
+# cross-builds every target and the Linux binaries are static (named
+# musl, the target av looks for first). The sound library needs cgo on
+# Linux and macOS, so those builds take the game's own no_audio tag;
+# Windows keeps its sound. Each archive holds the binary, the assets
+# that asciiverse/stage.sh picks (PATCHES.md, "Assets") and the notes.
+
+name: asciiverse-release
+
+on:
+  push:
+    tags: ["*-av.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "existing tag to build and release"
+        required: true
+
+env:
+  ID: end-of-eden
+  BIN: end_of_eden
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build and package
+        env:
+          CGO_ENABLED: "0"
+        run: |
+          mkdir -p dist
+          ldflags="-w -s -X github.com/BigJk/end_of_eden/internal/git.Tag=$TAG -X github.com/BigJk/end_of_eden/internal/git.CommitHash=$GITHUB_SHA"
+          while read -r goos goarch target; do
+            ext=; tags=no_audio
+            [ "$goos" = windows ] && ext=.exe && tags=
+            rm -rf stage && mkdir stage
+            GOOS=$goos GOARCH=$goarch go build -trimpath -tags "$tags" -ldflags "$ldflags" -o "stage/$BIN$ext" ./cmd/game
+            sh asciiverse/stage.sh stage
+            if [ "$goos" = windows ]; then
+              (cd stage && zip -q -r "../dist/$ID-$target.zip" .)
+            else
+              tar -czf "dist/$ID-$target.tar.gz" -C stage .
+            fi
+            file "stage/$BIN$ext"
+          done <<'TARGETS'
+          linux amd64 x86_64-unknown-linux-musl
+          linux arm64 aarch64-unknown-linux-musl
+          darwin amd64 x86_64-apple-darwin
+          darwin arm64 aarch64-apple-darwin
+          windows amd64 x86_64-pc-windows-msvc
+          windows arm64 aarch64-pc-windows-msvc
+          TARGETS
+
+      - name: Checksums
+        working-directory: dist
+        run: sha256sum * > SHA256SUMS && cat SHA256SUMS
+
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1 \
+            || gh release create "$TAG" -R "$GITHUB_REPOSITORY" --title "End of Eden $TAG" \
+                 --notes "End of Eden ${TAG%%-av.*} by BigJk (github.com/BigJk/end_of_eden), terminal version, built for the Asciiverse catalog: one binary for Linux, macOS and Windows. MIT licence. Changes: see PATCHES.md."
+          gh release upload "$TAG" dist/* -R "$GITHUB_REPOSITORY" --clobber
