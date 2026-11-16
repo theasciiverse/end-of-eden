@@ -19,7 +19,13 @@ type FaceGenerator struct {
 func (gen *FaceGenerator) Gen(id int) string {
 	var face []string
 
-	t := gen.data[id]
+	if gen == nil {
+		return ""
+	}
+	t, ok := gen.data[id]
+	if !ok || len(t) < 7 {
+		return ""
+	}
 	for i := 0; i < 7; i++ {
 		if len(t[i]) == 0 {
 			continue

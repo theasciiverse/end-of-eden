@@ -84,8 +84,9 @@ func main() {
 	fmt.Println(loadStyle.Render("Initializing Proc-Gen. Please wait..."))
 	{
 		// Init face generator
+		// The face data is optional: without it merchants have no face
 		if err := faces.InitGlobal("./assets/gen/faces"); err != nil {
-			panic(err)
+			log.Println("no face data:", err)
 		}
 
 		// Init other gens
