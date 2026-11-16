@@ -5,7 +5,7 @@
 #   asciiverse/stage.sh <folder>
 set -eu
 here=$(cd "$(dirname "$0")/.." && pwd)
-out=$1
+out=$(mkdir -p "$1" && cd "$1" && pwd)   # absolute: the copies below run from assets/
 mkdir -p "$out/assets/audio"
 cd "$here/assets"
 cp -r gen locals scripts tutorial "$out/assets/"
