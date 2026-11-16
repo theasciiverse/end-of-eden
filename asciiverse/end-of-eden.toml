@@ -43,7 +43,8 @@ mouse = true
 # 112x36 (the smallest whole screen), asciiverse/record-preview.sh: a new
 # run from the main menu, waking up in the cryo facility, a weapon found,
 # then the first fights, played by asciiverse/drive.py; cropped to 100x30
-# from the centre; the still is a fight in progress
+# from the centre; the still is the VIBRO Knife raised against a Repair
+# Drone and two Rust Mites
 [media]
 cast = "asciiverse/end-of-eden.cast"
 thumbnail_at = 20.0
