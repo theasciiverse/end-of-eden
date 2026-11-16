@@ -81,6 +81,10 @@ Windows builds keep their sound.
   (static, x86-64 and ARM64), macOS (Intel and Apple silicon) and Windows
   (x86-64 and ARM64), plus SHA256SUMS, cross-built with cgo off on one
   runner.
+- `.github/workflows/release.yaml`, `docker-publish.yaml`, `test.yaml`
+  (removed): upstream's own release (itch.io and GitHub, `_gl` included),
+  Docker image and test jobs, which would otherwise run on our pushes,
+  tags and releases.
 - `asciiverse/stage.sh` (new): the assets and notes for an archive.
 - `asciiverse/README.md`, `asciiverse/audio-README.md` (new): the
   archive's README and its audio credits.
