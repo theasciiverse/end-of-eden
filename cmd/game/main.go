@@ -50,6 +50,12 @@ func main() {
 
 	fmt.Println(lipgloss.NewStyle().Bold(true).Foreground(style.BaseRed).Render("End Of Eden"))
 
+	// Assets beside the binary, settings, save and logs in the state folder
+	if err := useStateDir(); err != nil {
+		fmt.Println("fatal:", err)
+		os.Exit(1)
+	}
+
 	// Init settings
 	fmt.Println(loadStyle.Render("Initializing Settings. Please wait..."))
 	{

@@ -11,6 +11,7 @@ import (
 )
 
 func ReadDir(path string) ([]FileInfo, error) {
+	path = resolve(path)
 	dir, err := os.ReadDir(path)
 	if err != nil {
 		return nil, err
@@ -28,7 +29,7 @@ func OpenFile(name string, flag int, perm os.FileMode) (io.WriteCloser, error) {
 }
 
 func ReadFile(path string) ([]byte, error) {
-	return os.ReadFile(path)
+	return os.ReadFile(resolve(path))
 }
 
 func WriteFile(path string, data []byte) error {
@@ -36,7 +37,7 @@ func WriteFile(path string, data []byte) error {
 }
 
 func Walk(root string, walkFn func(path string, isDir bool) error) error {
-	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	return filepath.Walk(resolve(root), func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
