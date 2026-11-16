@@ -12,10 +12,6 @@ import (
 	"strings"
 )
 
-func init() {
-	_ = os.Mkdir("./cache", 0755)
-}
-
 // hashFile returns a hash for the given file. If the file is not found in the
 // search paths, an error is returned.
 func hashFile(path string) (string, error) {
@@ -74,6 +70,7 @@ func setCache(hash string, data interface{}) error {
 		})
 	}
 
+	_ = os.Mkdir("./cache", 0755)
 	path := filepath.Join("./cache", hash)
 	return fs.WriteFile(path, []byte(strings.Join(lines, "\n")))
 }
