@@ -41,7 +41,11 @@ type Model struct {
 }
 
 func NewModel(zones *zone.Manager, settings settings.Settings, values []uiset.Value, saver uiset.Saver) Model {
-	img, _ := image2.Fetch("title.jpg", image2.WithResize(180, 9))
+	img, err := image2.Fetch("title.jpg", image2.WithResize(180, 9))
+	if err != nil {
+		// No title image: the game's text logo instead
+		img = lipgloss.NewStyle().Bold(true).Foreground(style.BaseRed).Render(ui.Title) + "\n"
+	}
 
 	audio.PlayMusic("planet_mining")
 
@@ -199,3 +203,4 @@ func (m Model) View() string {
 		titleImage,
 		m.choices.View())
 }
+
