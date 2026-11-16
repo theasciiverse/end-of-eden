@@ -85,9 +85,7 @@ func main() {
 	{
 		// Init face generator
 		// The face data is optional: without it merchants have no face
-		if err := faces.InitGlobal("./assets/gen/faces"); err != nil {
-			log.Println("no face data:", err)
-		}
+		_ = faces.InitGlobal("./assets/gen/faces")
 
 		// Init other gens
 		gen.InitGen()
